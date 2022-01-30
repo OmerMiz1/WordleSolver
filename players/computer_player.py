@@ -1,10 +1,10 @@
-from etc.utils import Color, count_unique_chars
-from etc.consts import EXCLUSION_RX, WORD_LEN, ALPHABET_LOWER
-from players.interface_player import IPlayer
 import re
 
+from etc.utils import Color, count_unique_chars
+from etc.consts import EXCLUSION_RX, WORD_LEN, ALPHABET_LOWER
 
-class ComputerPlayer(IPlayer):
+
+class ComputerPlayer:
     def __init__(self):
         self.possible_words = []
         self.grey_chars = []
