@@ -2,7 +2,7 @@ import random
 import re
 from enum import Enum
 
-from etc.consts import WORDS_FILE_NAME, VALID_WORD_RX
+from etc.consts import VALID_WORD_RX
 
 
 class Color(Enum):
@@ -21,18 +21,18 @@ def get_random_word(words):
     if not words:
         raise Exception("Words list is empty!", words)
 
-    rand_idx = random.randint(0, len(words)-1)
+    rand_idx = random.choice(range(len(words)))
     return words[rand_idx]
 
 
-def read_words():
+def read_words_from_file(file_path):
     """
     Reads all words from the text file defined in etc\consts.py file.
     :return: List of words
     """
     words_set = set()
 
-    with open(WORDS_FILE_NAME, "r") as words_file:
+    with open(file_path, "r") as words_file:
         for line in words_file.readlines():  # each line is a single word
             word = line.strip().lower()
 

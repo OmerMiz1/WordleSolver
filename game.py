@@ -1,21 +1,21 @@
 from collections import defaultdict
 
-from etc.utils import Color, read_words, get_random_word, is_valid_word
-from etc.consts import MAX_ATTEMPTS, INDEX_NOT_FOUND
+from etc.utils import Color, read_words_from_file, get_random_word, is_valid_word
+from etc.consts import MAX_ATTEMPTS, INDEX_NOT_FOUND, WORDS_FILE_NAME
 
 
 class WordleGame:
-    _WORDS = read_words()
 
     def __init__(self):
-        self._goal_word = ""
-        self.attempts = 0
-        self.word_found = False
+        self._words_list = read_words_from_file(WORDS_FILE_NAME)
+        self._goal_word = None
+        self.attempts = None
+        self.word_found = None
         self.reset()
 
     def apply_answer(self, guess):
         if not is_valid_word(guess):
-            raise ValueError("Invalid word", guess)
+            raise ValueError("Invalid word: ", guess)
         elif self.attempts == MAX_ATTEMPTS:  # Lose
             return  # Nothing
         elif guess == self._goal_word:  # Win
@@ -24,15 +24,15 @@ class WordleGame:
         self.attempts += 1
 
         result = []
-        chars_to_idxs = self.__gen_chars_indexes_map()
+        chars_to_idxs = self._gen_chars_indexes_map()
 
         for i, _ in enumerate(guess):
-            cur_char_color = self.__calc_char_color(guess, i, chars_to_idxs)
+            cur_char_color = self._calc_char_color(guess, i, chars_to_idxs)
 
             if cur_char_color is Color.GREEN:
                 chars_to_idxs[guess[i]].remove(i)
             elif cur_char_color is Color.YELLOW:
-                alt_idx = self.__get_alternative_index(guess, chars_to_idxs[guess[i]])
+                alt_idx = self._get_alternative_index(guess, chars_to_idxs[guess[i]])
                 chars_to_idxs[guess[i]].remove(alt_idx)
             result.append(cur_char_color)
 
@@ -42,12 +42,12 @@ class WordleGame:
         return not self.word_found and self.attempts < MAX_ATTEMPTS
 
     def reset(self):
-        self._goal_word = get_random_word(self._WORDS)
+        self._goal_word = get_random_word(self._words_list)
         self.attempts = 0
         self.word_found = False
 
     def get_all_possible_words(self):
-        return self._WORDS.copy()
+        return self._words_list.copy()
 
     def is_winner(self):
         return self.word_found
@@ -55,7 +55,7 @@ class WordleGame:
     def get_answer(self):
         return self._goal_word
 
-    def __gen_chars_indexes_map(self):
+    def _gen_chars_indexes_map(self):
         result = defaultdict(set)
 
         for i, c in enumerate(self._goal_word):
@@ -63,7 +63,7 @@ class WordleGame:
 
         return result
 
-    def __calc_char_color(self, guess, char_idx, char_to_indexes_map):
+    def _calc_char_color(self, guess, char_idx, char_to_indexes_map):
         """
         Function receives a guess that was applied as an answer, and idx of a
         letter that it's color is being evaluated and a map of chars to the
@@ -88,13 +88,15 @@ class WordleGame:
         elif tested_char not in self._goal_word:  # GREY
             result = Color.GREY
         elif tested_char in self._goal_word and char_to_indexes_map[tested_char]:  # YELLOW (possibly)
-            alt_idx = self.__get_alternative_index(guess, char_to_indexes_map[tested_char])
+            alt_idx = self._get_alternative_index(guess, char_to_indexes_map[tested_char])
             if alt_idx is not INDEX_NOT_FOUND:
                 result = Color.YELLOW
+            else:  # In goal word, but already claimed as yellow char (duplicate letter)
+                result = Color.GREY
 
         return result
 
-    def __get_alternative_index(self, guess, indexes):
+    def _get_alternative_index(self, guess, indexes):
         for i in indexes:
             if guess[i] is not self._goal_word[i]:
                 return i
