@@ -16,9 +16,9 @@ class WordleGame:
     def apply_answer(self, guess):
         if not is_valid_word(guess):
             raise ValueError("Invalid word", guess)
-        elif self.attempts is MAX_ATTEMPTS:  # Lose
+        elif self.attempts == MAX_ATTEMPTS:  # Lose
             return  # Nothing
-        elif guess == self._goal_word:
+        elif guess == self._goal_word:  # Win
             self.word_found = True
 
         self.attempts += 1
