@@ -1,7 +1,7 @@
 import re
 
 from etc.utils import CharSpotInWord, count_unique_chars
-from etc.consts import EXCLUSION_RX, WORD_LEN, ALPHABET_LOWER
+from etc.consts import EXCLUSION_REGEX, WORD_LEN, ALPHABET_LOWER
 
 
 class ComputerPlayer:
@@ -60,7 +60,7 @@ class ComputerPlayer:
             if char_spot_result is CharSpotInWord.CORRECT:  # i'th letter is known
                 elimination_regex += guess[i]
             else:
-                elimination_regex += EXCLUSION_RX.format(chars=self.wrong_chars[i])
+                elimination_regex += EXCLUSION_REGEX.format(chars=self.wrong_chars[i])
 
         # Filter function
         regex_filter = lambda word: re.search(elimination_regex, word)

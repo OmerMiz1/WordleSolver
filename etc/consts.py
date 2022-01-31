@@ -19,4 +19,4 @@ ALPHABET_LOWER = string.ascii_lowercase
 # be present.
 # taken from:
 # https://stackoverflow.com/questions/32967395/exclude-characters-from-group-regex-while-still-looking-for-characters
-EXCLUSION_RX = r"(?:(?![{chars}])[a-z])"
+EXCLUSION_REGEX = r"(?:(?![{chars}])[a-z])"
