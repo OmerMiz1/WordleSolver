@@ -5,10 +5,10 @@ from enum import Enum
 from etc.consts import VALID_WORD_RX
 
 
-class Color(Enum):
-    GREY = 0
-    YELLOW = 1
-    GREEN = 2
+class CharSpotInWord(Enum):
+    CORRECT = 0
+    WRONG_SPOT = 1
+    NOT_IN_WORD = 2
 
 
 def get_random_word(words):
@@ -19,10 +19,9 @@ def get_random_word(words):
     :return: a random word from words list
     """
     if not words:
-        raise Exception("Words list is empty!", words)
+        raise ValueError("Words list is empty!", words)
 
-    rand_idx = random.choice(range(len(words)))
-    return words[rand_idx]
+    return random.choice(words)
 
 
 def read_words_from_file(file_path):

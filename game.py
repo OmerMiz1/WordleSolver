@@ -1,11 +1,10 @@
 from collections import defaultdict
 
-from etc.utils import Color, read_words_from_file, get_random_word, is_valid_word
+from etc.utils import CharSpotInWord, read_words_from_file, get_random_word, is_valid_word
 from etc.consts import MAX_ATTEMPTS, INDEX_NOT_FOUND, WORDS_FILE_NAME
 
 
 class WordleGame:
-
     def __init__(self):
         self._words_list = read_words_from_file(WORDS_FILE_NAME)
         self._goal_word = None
@@ -24,17 +23,17 @@ class WordleGame:
         self.attempts += 1
 
         result = []
-        chars_to_idxs = self._gen_chars_indexes_map()
+        chars_to_indexes = self._gen_chars_indexes_map()
 
         for i, _ in enumerate(guess):
-            cur_char_color = self._calc_char_color(guess, i, chars_to_idxs)
+            char_spot = self._evaluate_char_spot(guess, i, chars_to_indexes)
 
-            if cur_char_color is Color.GREEN:
-                chars_to_idxs[guess[i]].remove(i)
-            elif cur_char_color is Color.YELLOW:
-                alt_idx = self._get_alternative_index(guess, chars_to_idxs[guess[i]])
-                chars_to_idxs[guess[i]].remove(alt_idx)
-            result.append(cur_char_color)
+            if char_spot is CharSpotInWord.CORRECT:
+                chars_to_indexes[guess[i]].remove(i)
+            elif char_spot is CharSpotInWord.WRONG_SPOT:
+                alt_idx = self._get_alternative_index(guess, chars_to_indexes[guess[i]])
+                chars_to_indexes[guess[i]].remove(alt_idx)
+            result.append(char_spot)
 
         return result
 
@@ -63,7 +62,7 @@ class WordleGame:
 
         return result
 
-    def _calc_char_color(self, guess, char_idx, char_to_indexes_map):
+    def _evaluate_char_spot(self, guess, char_index, char_to_indexes_map):
         """
         Function receives a guess that was applied as an answer, and idx of a
         letter that it's color is being evaluated and a map of chars to the
@@ -76,23 +75,23 @@ class WordleGame:
         3. GREY: specified letter is not a part of the goal word.
 
         :param guess: the str that was applied as an answer
-        :param char_idx: the index of the char that its color is evaluated
+        :param char_index: the index of the char that its color is evaluated
         :param char_to_indexes_map: map of goal word's chars to their indexes
         :return: Color (GREEN, YELLOW or GREY)
         """
         result = None
-        tested_char = guess[char_idx]
+        tested_char = guess[char_index]
 
-        if tested_char is self._goal_word[char_idx]:  # GREEN
-            result = Color.GREEN
+        if tested_char is self._goal_word[char_index]:  # GREEN
+            result = CharSpotInWord.CORRECT
         elif tested_char not in self._goal_word:  # GREY
-            result = Color.GREY
+            result = CharSpotInWord.NOT_IN_WORD
         elif tested_char in self._goal_word and char_to_indexes_map[tested_char]:  # YELLOW (possibly)
-            alt_idx = self._get_alternative_index(guess, char_to_indexes_map[tested_char])
-            if alt_idx is not INDEX_NOT_FOUND:
-                result = Color.YELLOW
+            alternative_index = self._get_alternative_index(guess, char_to_indexes_map[tested_char])
+            if alternative_index is not INDEX_NOT_FOUND:
+                result = CharSpotInWord.WRONG_SPOT
             else:  # In goal word, but already claimed as yellow char (duplicate letter)
-                result = Color.GREY
+                result = CharSpotInWord.NOT_IN_WORD
 
         return result
 

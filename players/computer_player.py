@@ -1,14 +1,14 @@
 import re
 
-from etc.utils import Color, count_unique_chars
+from etc.utils import CharSpotInWord, count_unique_chars
 from etc.consts import EXCLUSION_RX, WORD_LEN, ALPHABET_LOWER
 
 
 class ComputerPlayer:
     def __init__(self):
-        self.possible_words = []
-        self.grey_chars = []
-        self.yellow_chars = r""
+        self.possible_words = None
+        self.wrong_chars = None
+        self.required_chars = None
 
     def solve(self, game):
         self.reset()
@@ -16,22 +16,22 @@ class ComputerPlayer:
 
         while game.is_running():
             try:  # both funcs throw the same error (diff message)
-                guess = self.__calc_next_guess()
+                guess = self._calc_next_guess()
                 colors = game.apply_answer(guess)
             except ValueError as e:
                 print(e)
                 return
 
             if colors:
-                self.__update_elimination_rules(guess, colors)
-                self.__eliminate_words(guess, colors)
+                self._update_elimination_rules(guess, colors)
+                self._eliminate_words(guess, colors)
 
     def reset(self):
-        self.grey_chars = {i: r"" for i in range(WORD_LEN)}
-        self.yellow_chars = r""
+        self.wrong_chars = {i: r"" for i in range(WORD_LEN)}
+        self.required_chars = r""
         self.possible_words = []
 
-    def __update_elimination_rules(self, guess, colors):
+    def _update_elimination_rules(self, guess, colors):
         """
         After applying a guess, this function should be used to update
         the grey and yellow chars. These variables are later used to decide
@@ -45,32 +45,32 @@ class ComputerPlayer:
         """
         # Update green, yellow & grey chars
         for i, c in enumerate(colors):
-            if c is Color.GREY:
+            if c is CharSpotInWord.NOT_IN_WORD:
                 for j in range(WORD_LEN):
-                    self.grey_chars[j] += guess[i]
-            elif c is Color.YELLOW:
-                self.grey_chars[i] += guess[i]
-                self.yellow_chars += guess[i]
+                    self.wrong_chars[j] += guess[i]
+            elif c is CharSpotInWord.WRONG_SPOT:
+                self.wrong_chars[i] += guess[i]
+                self.required_chars += guess[i]
 
-    def __eliminate_words(self, guess, colors):
-        rx = r""
+    def _eliminate_words(self, guess, chars_spots_results):
+        elimination_regex = r""
 
         # Build regex (for eliminating impossible words)
-        for i, color in enumerate(colors):
-            if color is Color.GREEN:  # i'th letter is known
-                rx += guess[i]
+        for i, char_spot_result in enumerate(chars_spots_results):
+            if char_spot_result is CharSpotInWord.CORRECT:  # i'th letter is known
+                elimination_regex += guess[i]
             else:
-                rx += EXCLUSION_RX.format(chars=self.grey_chars[i])
+                elimination_regex += EXCLUSION_RX.format(chars=self.wrong_chars[i])
 
         # Filter function
-        regex_filter = lambda word: re.search(rx, word)
-        yellow_filter = lambda word: self.__contains_all_yellow_chars(word)
+        regex_filter = lambda word: re.search(elimination_regex, word)
+        yellow_filter = lambda word: self._contains_all_yellow_chars(word)
         both_filter = lambda word: (regex_filter(word) and yellow_filter(word))
 
         # Eliminate impossible words
         self.possible_words[::] = list(filter(both_filter, self.possible_words))
 
-    def __calc_next_guess(self):
+    def _calc_next_guess(self):
         """
         The logic of choosing a guess.
         First we calculate chars frequencies so we can value each word. The more
@@ -81,23 +81,23 @@ class ComputerPlayer:
 
         :return: string, the guess that should be applied this turn.
         """
-        chars_frequencies = self.__calc_chars_frequency(self.possible_words)
+        chars_frequencies = self._calc_chars_frequency(self.possible_words)
 
-        word_value_fn = lambda word: self.__word_value(word, chars_frequencies, self.yellow_chars)
+        word_value_fn = lambda word: self._word_value(word, chars_frequencies, self.required_chars)
         self.possible_words.sort(key=word_value_fn)
         if self.possible_words:
             return self.possible_words.pop()
         else:
             raise ValueError("Words list is empty")
 
-    def __contains_all_yellow_chars(self, word):
+    def _contains_all_yellow_chars(self, word):
         """
         Tells if given word contains all yellow chars.
 
         :param word: tested word
         :return: Bool
         """
-        yellow_chars_list = list(self.yellow_chars)  # Stack
+        yellow_chars_list = list(self.required_chars)  # Stack
         word_copy = word
 
         while yellow_chars_list:
@@ -109,7 +109,7 @@ class ComputerPlayer:
         return True
 
     @staticmethod
-    def __calc_max_unique_chars(words):
+    def _calc_max_unique_chars(words):
         """
         Calculate the word with most unique chars in a given words list
 
@@ -125,7 +125,7 @@ class ComputerPlayer:
         return result
 
     @staticmethod
-    def __calc_chars_frequency(words):
+    def _calc_chars_frequency(words):
         frequencies = {char: 0 for char in ALPHABET_LOWER}
 
         for word in words:
@@ -135,7 +135,7 @@ class ComputerPlayer:
         return frequencies
 
     @staticmethod
-    def __word_value(word, frequencies, yellow_chars):
+    def _word_value(word, frequencies, yellow_chars):
         """
         Calculates a word's value as a function of its chars, unique chars and
         the frequency of each contained char.
