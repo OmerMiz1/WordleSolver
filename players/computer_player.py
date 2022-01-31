@@ -17,21 +17,21 @@ class ComputerPlayer:
         while game.is_running():
             try:  # both funcs throw the same error (diff message)
                 guess = self._calc_next_guess()
-                colors = game.apply_answer(guess)
+                results = game.apply_answer(guess)
             except ValueError as e:
                 print(e)
                 return
 
-            if colors:
-                self._update_elimination_rules(guess, colors)
-                self._eliminate_words(guess, colors)
+            if results:
+                self._update_elimination_rules(guess, results)
+                self._eliminate_words(guess, results)
 
     def reset(self):
         self.wrong_chars = {i: r"" for i in range(WORD_LEN)}
         self.required_chars = r""
         self.possible_words = []
 
-    def _update_elimination_rules(self, guess, colors):
+    def _update_elimination_rules(self, guess, chars_spots_results):
         """
         After applying a guess, this function should be used to update
         the grey and yellow chars. These variables are later used to decide
@@ -40,11 +40,11 @@ class ComputerPlayer:
         list of required chars.
 
         :param guess: The guess applied to the game object.
-        :param colors: Result received from game object after applying guess.
+        :param chars_spots_results: Result received from game object after applying guess.
         :return: Nothing
         """
         # Update green, yellow & grey chars
-        for i, c in enumerate(colors):
+        for i, c in enumerate(chars_spots_results):
             if c is CharSpotInWord.NOT_IN_WORD:
                 for j in range(WORD_LEN):
                     self.wrong_chars[j] += guess[i]

@@ -65,32 +65,26 @@ class WordleGame:
     def _evaluate_char_spot(self, guess, char_index, char_to_indexes_map):
         """
         Function receives a guess that was applied as an answer, and idx of a
-        letter that it's color is being evaluated and a map of chars to the
+        letter that it's correctness is being evaluated and a map of chars to the
         indexes they appear in the goal word.
 
-        There are 3 return values options:
-        1. GREEN: guess matches goal at the specified index
-        2. YELLOW: guess does'nt match at the specified index, but the letter
-        should be somewhere else in the word
-        3. GREY: specified letter is not a part of the goal word.
-
         :param guess: the str that was applied as an answer
-        :param char_index: the index of the char that its color is evaluated
+        :param char_index: the index of the char that its correctness is evaluated
         :param char_to_indexes_map: map of goal word's chars to their indexes
-        :return: Color (GREEN, YELLOW or GREY)
+        :return: Enum, CharSpotInWord (see utils.py)
         """
         result = None
         tested_char = guess[char_index]
 
-        if tested_char is self._goal_word[char_index]:  # GREEN
+        if tested_char is self._goal_word[char_index]:
             result = CharSpotInWord.CORRECT
-        elif tested_char not in self._goal_word:  # GREY
+        elif tested_char not in self._goal_word:
             result = CharSpotInWord.NOT_IN_WORD
-        elif tested_char in self._goal_word and char_to_indexes_map[tested_char]:  # YELLOW (possibly)
+        elif tested_char in self._goal_word and char_to_indexes_map[tested_char]:
             alternative_index = self._get_alternative_index(guess, char_to_indexes_map[tested_char])
             if alternative_index is not INDEX_NOT_FOUND:
                 result = CharSpotInWord.WRONG_SPOT
-            else:  # In goal word, but already claimed as yellow char (duplicate letter)
+            else:  # In goal word, but redundant duplicate
                 result = CharSpotInWord.NOT_IN_WORD
 
         return result
