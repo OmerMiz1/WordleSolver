@@ -1,11 +1,11 @@
 import random
 import re
-from enum import Enum
+from enum import IntEnum
 
-from etc.consts import VALID_WORD_RX
+from etc.consts import VALID_WORD_REGEX
 
 
-class CharSpotInWord(Enum):
+class CharSpotInWord(IntEnum):
     CORRECT = 0
     WRONG_SPOT = 1
     NOT_IN_WORD = 2
@@ -35,7 +35,7 @@ def read_words_from_file(file_path):
         for line in words_file.readlines():  # each line is a single word
             word = line.strip().lower()
 
-            if word not in words_set and is_valid_word(word):
+            if is_valid_word(word):
                 words_set.add(word)
 
     return list(words_set)
@@ -64,7 +64,7 @@ def is_valid_word(word):
     :param word: the word being validated
     :return: bool
     """
-    return re.fullmatch(VALID_WORD_RX, word) is not None
+    return re.fullmatch(VALID_WORD_REGEX, word) is not None
 
 
 def count_unique_chars(word):

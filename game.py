@@ -2,7 +2,7 @@ import random
 from collections import defaultdict
 
 from etc.utils import CharSpotInWord, get_random_file_line, is_valid_word, read_words_from_file
-from etc.consts import MAX_ATTEMPTS, INDEX_NOT_FOUND, WORDS_FILE_NAME
+from etc.consts import MAX_WORD_GUESSES, INDEX_NOT_FOUND, WORDS_FILE_NAME
 
 
 class WordleGame:
@@ -15,7 +15,7 @@ class WordleGame:
     def apply_answer(self, guess):
         if not is_valid_word(guess):
             raise ValueError("Invalid word: ", guess)
-        elif self.attempts == MAX_ATTEMPTS:  # Lose
+        elif self.attempts == MAX_WORD_GUESSES:  # Lose
             return  # Nothing
         elif guess == self._goal_word:  # Win
             self.word_found = True
@@ -38,7 +38,7 @@ class WordleGame:
         return result
 
     def is_running(self):
-        return not self.word_found and self.attempts < MAX_ATTEMPTS
+        return not self.word_found and self.attempts < MAX_WORD_GUESSES
 
     def reset(self):
         self._goal_word = get_random_file_line(WORDS_FILE_NAME)
