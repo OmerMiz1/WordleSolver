@@ -31,8 +31,8 @@ class WordleGame:
             if char_spot is CharSpotInWord.CORRECT:
                 chars_to_indexes[guess[i]].remove(i)
             elif char_spot is CharSpotInWord.WRONG_SPOT:
-                alt_idx = self._get_alternative_index(guess, chars_to_indexes[guess[i]])
-                chars_to_indexes[guess[i]].remove(alt_idx)
+                alternative_index = self._get_alternative_index(guess, chars_to_indexes[guess[i]])
+                chars_to_indexes[guess[i]].remove(alternative_index)
             result.append(char_spot)
 
         return result
@@ -73,14 +73,13 @@ class WordleGame:
         :param char_to_indexes_map: map of goal word's chars to their indexes
         :return: Enum, CharSpotInWord (see utils.py)
         """
-        result = None
         tested_char = guess[char_index]
 
         if tested_char is self._goal_word[char_index]:
             result = CharSpotInWord.CORRECT
         elif tested_char not in self._goal_word:
             result = CharSpotInWord.NOT_IN_WORD
-        elif tested_char in self._goal_word and char_to_indexes_map[tested_char]:
+        else:  # tested char is somewhere else in goal word
             alternative_index = self._get_alternative_index(guess, char_to_indexes_map[tested_char])
             if alternative_index is not INDEX_NOT_FOUND:
                 result = CharSpotInWord.WRONG_SPOT
