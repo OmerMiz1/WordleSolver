@@ -11,17 +11,17 @@ class CharSpotInWord(Enum):
     NOT_IN_WORD = 2
 
 
-def get_random_word(words):
+def get_random_file_line(file_path):
     """
-    Given a list of words, returns a random word.
+    Returns a random line within a file.
 
-    :param words: list of words (strings)
-    :return: a random word from words list
+    :param file_path: path to the target file
+    :return: string (random line from the file)
     """
-    if not words:
-        raise ValueError("Words list is empty!", words)
+    words_count = count_file_lines(file_path)
+    random_line_number = random.randint(0, words_count - 1)
 
-    return random.choice(words)
+    return read_line_from_file(file_path, random_line_number)
 
 
 def read_words_from_file(file_path):
@@ -39,6 +39,21 @@ def read_words_from_file(file_path):
                 words_set.add(word)
 
     return list(words_set)
+
+
+def read_line_from_file(file_path, line_number):
+    file_lines_count = count_file_lines(file_path)
+    if line_number > file_lines_count-1:
+        raise Exception(f"Invalid line number: ", line_number, file_lines_count)
+
+    with open(file_path, "r") as file:
+        word = file.readlines()[line_number]
+        return word.strip().lower()
+
+
+def count_file_lines(file_path):
+    with open(file_path, "r") as file:
+        return len(file.readlines())
 
 
 def is_valid_word(word):

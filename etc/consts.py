@@ -1,7 +1,7 @@
 # GENERAL ##
 
 # FILES ##
-WORDS_FILE_NAME = "words.txt"
+WORDS_FILE_NAME = "words_filtered.txt"
 
 #  GAME  ##
 MAX_ATTEMPTS = 6

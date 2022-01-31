@@ -1,12 +1,12 @@
+import random
 from collections import defaultdict
 
-from etc.utils import CharSpotInWord, read_words_from_file, get_random_word, is_valid_word
+from etc.utils import CharSpotInWord, get_random_file_line, is_valid_word, read_words_from_file
 from etc.consts import MAX_ATTEMPTS, INDEX_NOT_FOUND, WORDS_FILE_NAME
 
 
 class WordleGame:
     def __init__(self):
-        self._words_list = read_words_from_file(WORDS_FILE_NAME)
         self._goal_word = None
         self.attempts = None
         self.word_found = None
@@ -41,12 +41,13 @@ class WordleGame:
         return not self.word_found and self.attempts < MAX_ATTEMPTS
 
     def reset(self):
-        self._goal_word = get_random_word(self._words_list)
+        self._goal_word = get_random_file_line(WORDS_FILE_NAME)
         self.attempts = 0
         self.word_found = False
 
-    def get_all_possible_words(self):
-        return self._words_list.copy()
+    @staticmethod
+    def get_all_possible_words():
+        return read_words_from_file(WORDS_FILE_NAME)
 
     def is_winner(self):
         return self.word_found
