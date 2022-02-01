@@ -1,7 +1,5 @@
 import string
 
-# GENERAL ##
-
 # FILES ##
 WORDS_FILE_NAME = "words_filtered.txt"
 
